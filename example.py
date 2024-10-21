@@ -230,6 +230,7 @@ def sorted_domain(variableList, constraints, var):
             constrainingValues[tempValue] = [int(val)]
 
     orderedDomain = []
+    print(constrainingValues)
     for s in sorted(constrainingValues.keys()):
         orderedDomain.append(constrainingValues[s])
 

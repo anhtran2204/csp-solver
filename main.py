@@ -142,14 +142,14 @@ def backtracking_search(assignment, domains, constraints, procedure=False):
     for value in values:
         assignment[var] = value
         if is_consistent(var, value, assignment, constraints):
-            if len(domains[var]) == 0:
-                counter += 1
-                # print(assignment, "failure")
-                print_assignment(counter, assignment, " failure")
             if procedure:
                 new_domains = forward_checking(assignment, var, domains, constraints)
             else:
                 new_domains = domains.copy()
+            if len(new_domains[var]) == 0:
+                counter += 1
+                # print(assignment, "failure")
+                print_assignment(counter, assignment, " failure")
             result = backtracking_search(assignment, new_domains, constraints, procedure)
             if result is not False:
                 return result
@@ -164,16 +164,29 @@ def backtracking_search(assignment, domains, constraints, procedure=False):
     return False
 
 def forward_checking(assignment, var, domains, constraints):
-    local_domains = domains.copy()
+    assigned_value = assignment[var]
+
     for constraint in constraints:
         var1, op, var2 = constraint
         if var1 == var and var2 not in assignment:
-            for value in domains[var2]:
-                if not evaluate_constraints(assignment, var, op, var2, value):
-                    local_domains[var2].remove(value)
-                    if not local_domains[var2]:
-                        return None
-    return local_domains
+            removal_list = []
+            for val in domains[var2]:
+                if evaluate_constraints(assignment, var1, op, var2, assigned_value, val):
+                    removal_list.append(val)
+                
+            for removals in removal_list:
+                domains[var2].remove(removals)
+        elif var2 == var and var1 not in assignment:
+            removal_list = []
+            for val in domains[var1]:
+                if evaluate_constraints(assignment, var1, op, var2, val, assigned_value):
+                    removal_list.append(val)
+                
+            for removals in removal_list:
+                domains[var1].remove(removals)
+
+    # print(domains)
+    return domains
 
 def csp_solver(varFile, conFile, procedure):
     domains = parse_domains(varFile)

@@ -1,6 +1,5 @@
 import sys
 
-global counter
 counter = 0
 
 def parse_domains(varFile):
@@ -121,7 +120,10 @@ def evaluate_constraints(assignment, var1, op, var2,val1=None, val2=None):
     elif op == "<":
         return v1 < v2
 
-def backtracking_search(counter, assignment, domains, constraints, procedure=False):
+def backtracking_search(assignment, domains, constraints, procedure=False):
+    global counter
+    # if counter >= 30:
+    #     sys.exit()
     if len(assignment) == len(domains):
         counter += 1
         print(assignment, "solution")
@@ -129,23 +131,22 @@ def backtracking_search(counter, assignment, domains, constraints, procedure=Fal
     var = most_constrained_variable(assignment, domains, constraints)
     values = least_constraining_value(var, assignment, domains, constraints)
     for value in values:
+        assignment[var] = value
         if is_consistent(var, value, assignment, constraints):
-            assignment[var] = value
             if len(domains[var]) == 0:
-                print(assignment, "failure")
                 counter += 1
-                if counter >= 30:
-                    sys.exit()
-                return False
+                print(assignment, "failure")
             new_domains = domains.copy()
-            result = backtracking_search(counter, assignment, new_domains, constraints, procedure)
+            result = backtracking_search(assignment, new_domains, constraints, procedure)
             if result is not False:
                 return result
             assignment.pop(var, None)
         else:
+            counter += 1
             print(assignment, "failure")
-    counter += 1
-    # print(assignment, "failure")
+            assignment.pop(var, None)
+        if counter >= 30:
+            sys.exit()
     return False
 
 # def forward_checking(assignment, var, domains, constraints):
@@ -158,11 +159,10 @@ def csp_solver(varFile, conFile, procedure):
     domains = parse_domains(varFile)
     constraints = parse_constraints(conFile)
     assignment = {}
-    counter = 0
     if procedure == "none":
-        backtracking_search(counter, assignment, domains, constraints)
+        backtracking_search(assignment, domains, constraints)
     elif procedure == "fc":
-        backtracking_search(counter, assignment, domains, constraints, True)
+        backtracking_search(assignment, domains, constraints, True)
 
 def main():
     if len(sys.argv) != 4:

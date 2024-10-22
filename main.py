@@ -142,6 +142,8 @@ def backtracking_search(counter, assignment, domains, constraints, procedure=Fal
             if result is not False:
                 return result
             assignment.pop(var, None)
+        else:
+            print(assignment, "failure")
     counter += 1
     # print(assignment, "failure")
     return False

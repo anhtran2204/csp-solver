@@ -1,3 +1,4 @@
+import copy
 import sys
 
 counter = 0
@@ -135,21 +136,24 @@ def backtracking_search(assignment, domains, constraints, procedure=False):
     if len(assignment) == len(domains):
         counter += 1
         # print(assignment, "solution")
-        print_assignment(counter, assignment, " solution")
+        print_assignment(counter, assignment, "  solution")
         return True
     var = most_constrained_variable(assignment, domains, constraints)
     values = least_constraining_value(var, assignment, domains, constraints)
     for value in values:
         assignment[var] = value
+        new_domains = None
         if is_consistent(var, value, assignment, constraints):
             if procedure:
-                new_domains = forward_checking(assignment, var, domains, constraints)
+                new_domains = forward_checking(assignment, var, copy.deepcopy(domains), constraints)
+                for new_var in new_domains:
+                    if len(new_domains[new_var]) == 0:
+                        counter += 1
+                        # print(assignment, "failure")
+                        print_assignment(counter, assignment, "  failure")
+                        continue
             else:
-                new_domains = domains.copy()
-            if len(new_domains[var]) == 0:
-                counter += 1
-                # print(assignment, "failure")
-                print_assignment(counter, assignment, " failure")
+                new_domains = domains
             result = backtracking_search(assignment, new_domains, constraints, procedure)
             if result is not False:
                 return result
@@ -157,10 +161,10 @@ def backtracking_search(assignment, domains, constraints, procedure=False):
         else:
             counter += 1
             # print(assignment, "failure")
-            print_assignment(counter, assignment, " failure")
+            print_assignment(counter, assignment, "  failure")
             assignment.pop(var, None)
-        if counter >= 30:
-            sys.exit()
+        # if counter >= 30:
+        #     sys.exit()
     return False
 
 def forward_checking(assignment, var, domains, constraints):
@@ -171,7 +175,7 @@ def forward_checking(assignment, var, domains, constraints):
         if var1 == var and var2 not in assignment:
             removal_list = []
             for val in domains[var2]:
-                if evaluate_constraints(assignment, var1, op, var2, assigned_value, val):
+                if not evaluate_constraints(assignment, var1, op, var2, assigned_value, val):
                     removal_list.append(val)
                 
             for removals in removal_list:
@@ -179,7 +183,7 @@ def forward_checking(assignment, var, domains, constraints):
         elif var2 == var and var1 not in assignment:
             removal_list = []
             for val in domains[var1]:
-                if evaluate_constraints(assignment, var1, op, var2, val, assigned_value):
+                if not evaluate_constraints(assignment, var1, op, var2, val, assigned_value):
                     removal_list.append(val)
                 
             for removals in removal_list:

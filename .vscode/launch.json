@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "~/UTD-Projects/Senior/F24/csp-solver/variables/ex0.var", "~/UTD-Projects/Senior/F24/csp-solver/constraints/ex0.con", "fc"
+                "~/UTD-Projects/Senior/F24/csp-solver/variables/ex0.var", "~/UTD-Projects/Senior/F24/csp-solver/constraints/ex0.con", "none"
             ]
         }
     ]
